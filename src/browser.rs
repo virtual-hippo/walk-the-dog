@@ -1,10 +1,13 @@
 use std::future::Future;
 
 use anyhow::{anyhow, Result};
-use wasm_bindgen::prelude::*;
-use wasm_bindgen::JsCast;
+use wasm_bindgen::{
+    closure::{Closure, WasmClosureFnOnce},
+    prelude::*,
+    JsCast,
+};
 use wasm_bindgen_futures::JsFuture;
-use web_sys::{CanvasRenderingContext2d, Document, HtmlCanvasElement, Window};
+use web_sys::{CanvasRenderingContext2d, Document, HtmlCanvasElement, HtmlImageElement, Window};
 
 macro_rules! log {
     ($($t:tt)*) => {
@@ -68,4 +71,15 @@ pub async fn fetch_json(json_path: &str) -> Result<JsValue> {
     )
     .await
     .map_err(|err| anyhow!("error fetchng JSON {:#?}", err))
+}
+
+pub fn new_image() -> Result<HtmlImageElement> {
+    HtmlImageElement::new().map_err(|err| anyhow!("Could not create HtmlImageElement: {:#?}", err))
+}
+
+pub fn closure_once<F, A, R>(fn_once: F) -> Closure<F::FnMut>
+where
+    F: 'static + WasmClosureFnOnce<A, R>,
+{
+    Closure::once(fn_once)
 }
