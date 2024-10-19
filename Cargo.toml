@@ -30,6 +30,7 @@ futures = "0.3.18"
 wasm-bindgen-futures = "0.4.28"
 getrandom = {verson = "0.2.3", features = ["js"]}
 serde = { version = "1.0.210", features = ["derive"] }
+anyhow = "1.0.51"
 
 
 # The `web-sys` crate allows you to interact with the various browser APIs,
