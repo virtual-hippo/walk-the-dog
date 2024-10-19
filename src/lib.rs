@@ -1,6 +1,7 @@
-use std::{rc::Rc, sync::Mutex};
+use std::{collections::HashMap, rc::Rc, sync::Mutex};
 
 use rand::prelude::*;
+use serde::Deserialize;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::console;
@@ -12,6 +13,24 @@ use web_sys::console;
 #[cfg(feature = "wee_alloc")]
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
+
+#[derive(Deserialize)]
+struct Rect {
+    x: u16,
+    y: u16,
+    w: u16,
+    h: u16,
+}
+
+#[derive(Deserialize)]
+struct Cell {
+    farme: Rect,
+}
+
+#[derive(Deserialize)]
+struct Sheet {
+    frames: HashMap<String, Cell>,
+}
 
 fn draw_triangle(
     context: &web_sys::CanvasRenderingContext2d,
@@ -76,6 +95,13 @@ fn sierpinski(
     }
 }
 
+async fn fetch_json(json_path: &str) -> Result<JsValue, JsValue> {
+    let window = web_sys::window().unwrap();
+    let resp_value = wasm_bindgen_futures::JsFuture::from(window.fetch_with_str(json_path)).await?;
+    let resp: web_sys::Response = resp_value.dyn_into()?;
+    wasm_bindgen_futures::JsFuture::from(resp.json()?).await
+}
+
 #[wasm_bindgen(start)]
 pub fn main_js() -> Result<(), JsValue> {
     console_error_panic_hook::set_once();
@@ -106,13 +132,13 @@ pub fn main_js() -> Result<(), JsValue> {
 
         let callback = Closure::once(move || {
             if let Some(sender) = success_tx.lock().ok().and_then(|mut opt| opt.take()) {
-                sender.send(Ok(()));
+                let _ = sender.send(Ok(()));
             }
         });
 
         let error_callback = Closure::once(move |err| {
             if let Some(sender) = error_tx.lock().ok().and_then(|mut opt| opt.take()) {
-                sender.send(Err(err));
+                let _ = sender.send(Err(err));
             }
         });
 
@@ -121,8 +147,15 @@ pub fn main_js() -> Result<(), JsValue> {
 
         image.set_src("Idle (1).png");
 
-        success_rx.await;
-        context.draw_image_with_html_image_element(&image, 0.0, 0.0);
+        let _ = success_rx.await;
+        let _ = context.draw_image_with_html_image_element(&image, 0.0, 0.0);
+
+        let json = fetch_json("rhb.json")
+            .await
+            .expect("Could not fetch rhb.json");
+        let sheet: Sheet = json
+            .into_serde()
+            .expect("Could not convert rhb.json into a Sheet structure");
 
         sierpinski(
             &context,
