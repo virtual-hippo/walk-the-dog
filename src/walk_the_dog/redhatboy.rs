@@ -3,7 +3,7 @@ use crate::walk_the_dog::*;
 
 use web_sys::HtmlImageElement;
 
-pub(super) struct RedHatBoy {
+pub(crate) struct RedHatBoy {
     state_machine: RedHatBoyStateMachine,
     sprite_sheet: Sheet,
     image: HtmlImageElement,
