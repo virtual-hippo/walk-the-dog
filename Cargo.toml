@@ -38,7 +38,7 @@ async-trait = "0.1.52"
 # like the DOM.
 [dependencies.web-sys]
 version = "0.3.55"
-features = ["console", "CanvasRenderingContext2d","Document", "Element", "HtmlCanvasElement", "HtmlImageElement", "Performance", "Response", "Window"]
+features = ["console", "CanvasRenderingContext2d","Document", "Element", "HtmlCanvasElement", "HtmlImageElement", "KeyboardEvent", "Performance", "Response", "Window"]
 
 
 # These crates are used for running unit tests.

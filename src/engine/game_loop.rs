@@ -15,6 +15,7 @@ type SharedLoopClosure = Rc<RefCell<Option<LoopClosure>>>;
 
 impl GameLoop {
     pub async fn start(game: impl Game + 'static) -> Result<()> {
+        let mut keyevent_receiver = prepare_input()?;
         let mut game = game.initialize().await?;
         let mut game_loop = GameLoop {
             last_frame: browser::now()?,
@@ -24,12 +25,14 @@ impl GameLoop {
 
         let f: SharedLoopClosure = Rc::new(RefCell::new(None));
         let g = f.clone();
+        let mut keystate = KeyState::new();
 
         *g.borrow_mut() = Some(browser::create_raf_closure(move |perf: f64| {
+            process_input(&mut keystate, &mut keyevent_receiver);
             game_loop.accumulated_delta += (perf - game_loop.last_frame) as f32;
 
             while game_loop.accumulated_delta > FRAME_SIZE {
-                game.update();
+                game.update(&keystate);
                 game_loop.accumulated_delta -= FRAME_SIZE;
             }
 

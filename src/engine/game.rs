@@ -6,6 +6,6 @@ use async_trait::async_trait;
 #[async_trait(?Send)]
 pub trait Game {
     async fn initialize(&self) -> Result<Box<dyn Game>>;
-    fn update(&mut self);
+    fn update(&mut self, keystate: &KeyState);
     fn draw(&mut self, renderer: &Renderer);
 }
