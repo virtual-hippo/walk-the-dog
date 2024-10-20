@@ -29,6 +29,7 @@ pub struct WalkDog {
     image: Option<HtmlImageElement>,
     sheet: Option<Sheet>,
     frame: u8,
+    position: engine::Point,
 }
 
 impl WalkDog {
@@ -37,6 +38,7 @@ impl WalkDog {
             image: None,
             sheet: None,
             frame: 0,
+            position: engine::Point { x: 0, y: 0 },
         }
     }
 }
@@ -52,10 +54,28 @@ impl engine::Game for WalkDog {
             image: Some(image),
             sheet: Some(sheet),
             frame: self.frame,
+            position: self.position,
         }))
     }
 
     fn update(&mut self, keystate: &engine::KeyState) {
+        let mut velocity = engine::Point { x: 0, y: 0 };
+        if keystate.is_pressed("ArrowDown") {
+            velocity.y += 3;
+        }
+        if keystate.is_pressed("ArrowUp") {
+            velocity.y -= 3;
+        }
+        if keystate.is_pressed("ArrowRight") {
+            velocity.x += 3;
+        }
+        if keystate.is_pressed("ArrowLeft") {
+            velocity.x -= 3;
+        }
+
+        self.position.x += velocity.x;
+        self.position.y += velocity.y;
+
         if self.frame < 23 {
             self.frame += 1;
         } else {
@@ -83,7 +103,12 @@ impl engine::Game for WalkDog {
                     splite.frame.w.into(),
                     splite.frame.h.into(),
                 ),
-                &engine::Rect::new(300.0, 300.0, splite.frame.w.into(), splite.frame.h.into()),
+                &engine::Rect::new(
+                    self.position.x.into(),
+                    self.position.y.into(),
+                    splite.frame.w.into(),
+                    splite.frame.h.into(),
+                ),
             );
         });
     }
