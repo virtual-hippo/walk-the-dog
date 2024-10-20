@@ -4,17 +4,22 @@ const FLOOR: i16 = 475;
 
 const IDLE_FRAME_NAME: &str = "Idle";
 const RUN_FRAME_NAME: &str = "Run";
+const SLIDING_FRAME_NAME: &str = "Slide";
 
 const IDLE_FRAMES: u8 = 29;
 const RUNNING_FRAMES: u8 = 23;
+const SLIDING_FRAMES: u8 = 14;
 
-const RUNNING_SPEED: i16 = 23;
+const RUNNING_SPEED: i16 = 3;
 
 #[derive(Clone, Copy)]
 pub(super) struct Idle;
 
 #[derive(Clone, Copy)]
 pub(super) struct Running;
+
+#[derive(Clone, Copy)]
+pub(super) struct Sliding;
 
 #[derive(Clone, Copy)]
 pub(super) struct RedHatBoyContext {
@@ -83,17 +88,54 @@ impl RedHatBoyState<Idle> {
         IDLE_FRAME_NAME
     }
 
-    pub(super) fn update(&mut self) {
-        self.context = self.context.update(IDLE_FRAMES)
+    pub(super) fn update(mut self) -> Self {
+        self.context = self.context.update(IDLE_FRAMES);
+        self
     }
 }
 
 impl RedHatBoyState<Running> {
+    pub(super) fn slide(self) -> RedHatBoyState<Sliding> {
+        RedHatBoyState {
+            context: self.context.reset_frame(),
+            _state: Sliding {},
+        }
+    }
+
     pub(super) fn frame_name(&self) -> &str {
         RUN_FRAME_NAME
     }
 
-    pub(super) fn update(&mut self) {
-        self.context = self.context.update(RUNNING_FRAMES)
+    pub(super) fn update(mut self) -> Self {
+        self.context = self.context.update(RUNNING_FRAMES);
+        self
+    }
+}
+
+pub(super) enum SlidingEndState {
+    Complete(RedHatBoyState<Running>),
+    Sliding(RedHatBoyState<Sliding>),
+}
+
+impl RedHatBoyState<Sliding> {
+    fn stand(self) -> RedHatBoyState<Running> {
+        RedHatBoyState {
+            context: self.context.reset_frame(),
+            _state: Running {},
+        }
+    }
+
+    pub(super) fn frame_name(&self) -> &str {
+        SLIDING_FRAME_NAME
+    }
+
+    pub(super) fn update(mut self) -> SlidingEndState {
+        self.context = self.context.update(SLIDING_FRAMES);
+
+        if self.context.frame >= SLIDING_FRAMES {
+            SlidingEndState::Complete(self.stand())
+        } else {
+            SlidingEndState::Sliding(self)
+        }
     }
 }
