@@ -1,5 +1,7 @@
 use web_sys::{CanvasRenderingContext2d, HtmlImageElement};
 
+use super::Point;
+
 pub struct Rect {
     x: f32,
     y: f32,
@@ -49,6 +51,12 @@ impl Renderer {
                 destination.width.into(),
                 destination.height.into(),
             )
-            .expect("Drawing is thorowing exceptions! Unrecoverable error.");
+            .expect("Drawing is throwing exceptions! Unrecoverable error.");
+    }
+
+    pub fn draw_entire_image(&self, image: &HtmlImageElement, position: &Point) {
+        self.context
+            .draw_image_with_html_image_element(image, position.x.into(), position.y.into())
+            .expect("Drawing is throwing exceptions! Unrecoverable error.");
     }
 }
