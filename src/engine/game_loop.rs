@@ -1,5 +1,5 @@
 use crate::browser::{self, LoopClosure};
-use crate::engine::{game::Game, renderer::Renderer};
+use crate::engine::*;
 
 use anyhow::{anyhow, Result};
 use std::{cell::RefCell, rc::Rc};

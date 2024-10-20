@@ -12,7 +12,7 @@ pub fn main_js() -> Result<(), JsValue> {
 
     browser::spawn_local(async move {
         let game = game::WalkDog::new();
-        engine::game_loop::GameLoop::start(game)
+        engine::GameLoop::start(game)
             .await
             .expect("Coulid not start geame");
     });

@@ -1,9 +1,5 @@
 use crate::browser;
-use crate::engine::{
-    game::Game,
-    load_asset::load_image,
-    renderer::{Rect, Renderer},
-};
+use crate::engine;
 
 use anyhow::Result;
 use async_trait::async_trait;
@@ -46,11 +42,11 @@ impl WalkDog {
 }
 
 #[async_trait(?Send)]
-impl Game for WalkDog {
-    async fn initialize(&self) -> Result<Box<dyn Game>> {
+impl engine::Game for WalkDog {
+    async fn initialize(&self) -> Result<Box<dyn engine::Game>> {
         let sheet = browser::fetch_json("rhb.json").await?.into_serde()?;
 
-        let image = load_image("rhb.png").await?;
+        let image = engine::load_image("rhb.png").await?;
 
         Ok(Box::new(WalkDog {
             image: Some(image),
@@ -67,7 +63,7 @@ impl Game for WalkDog {
         }
     }
 
-    fn draw(&mut self, renderer: &Renderer) {
+    fn draw(&mut self, renderer: &engine::Renderer) {
         let current_sprite = (self.frame / 3) + 1;
         let frame_name = format!("Run ({}).png", current_sprite);
         let splite = self
@@ -76,18 +72,18 @@ impl Game for WalkDog {
             .and_then(|sheet| sheet.frames.get(&frame_name))
             .expect("Cell not found");
 
-        renderer.clear(&Rect::new(0.0, 0.0, 600.0, 600.0));
+        renderer.clear(&engine::Rect::new(0.0, 0.0, 600.0, 600.0));
 
         self.image.as_ref().map(|image| {
             let _ = renderer.draw_image(
                 image,
-                &Rect::new(
+                &engine::Rect::new(
                     splite.frame.x.into(),
                     splite.frame.y.into(),
                     splite.frame.w.into(),
                     splite.frame.h.into(),
                 ),
-                &Rect::new(300.0, 300.0, splite.frame.w.into(), splite.frame.h.into()),
+                &engine::Rect::new(300.0, 300.0, splite.frame.w.into(), splite.frame.h.into()),
             );
         });
     }
