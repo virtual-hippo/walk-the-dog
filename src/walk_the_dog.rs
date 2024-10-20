@@ -25,16 +25,16 @@ struct Sheet {
     frames: HashMap<String, Cell>,
 }
 
-pub struct WalkDog {
+pub struct WalkTheDog {
     image: Option<HtmlImageElement>,
     sheet: Option<Sheet>,
     frame: u8,
     position: engine::Point,
 }
 
-impl WalkDog {
+impl WalkTheDog {
     pub fn new() -> Self {
-        WalkDog {
+        WalkTheDog {
             image: None,
             sheet: None,
             frame: 0,
@@ -44,13 +44,13 @@ impl WalkDog {
 }
 
 #[async_trait(?Send)]
-impl engine::Game for WalkDog {
+impl engine::Game for WalkTheDog {
     async fn initialize(&self) -> Result<Box<dyn engine::Game>> {
         let sheet = browser::fetch_json("rhb.json").await?.into_serde()?;
 
         let image = engine::load_image("rhb.png").await?;
 
-        Ok(Box::new(WalkDog {
+        Ok(Box::new(WalkTheDog {
             image: Some(image),
             sheet: Some(sheet),
             frame: self.frame,
