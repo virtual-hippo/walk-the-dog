@@ -39,7 +39,9 @@ impl engine::Game for WalkTheDog {
             if keystate.is_pressed("ArrowDown") {
                 rhb.slide();
             }
-            if keystate.is_pressed("ArrowUp") {}
+            if keystate.is_pressed("Space") {
+                rhb.jump();
+            }
             if keystate.is_pressed("ArrowRight") {
                 rhb.run_right();
             }
