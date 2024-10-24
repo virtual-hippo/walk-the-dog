@@ -44,8 +44,10 @@ impl RedHatBoy {
                 splite.frame.h.into(),
             ),
             &Rect::new(
-                self.state_machine.context().position.x.into(),
-                self.state_machine.context().position.y.into(),
+                (self.state_machine.context().position.x + splite.sprite_source_size.x as i16)
+                    .into(),
+                (self.state_machine.context().position.y + splite.sprite_source_size.y as i16)
+                    .into(),
                 splite.frame.w.into(),
                 splite.frame.h.into(),
             ),

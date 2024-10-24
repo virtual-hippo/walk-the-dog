@@ -1,6 +1,7 @@
 use crate::engine::Point;
 
-const FLOOR: i16 = 475;
+const FLOOR: i16 = 479;
+const STARTING_POINT: i16 = -20;
 
 const IDLE_FRAME_NAME: &str = "Idle";
 const RUN_FRAME_NAME: &str = "Run";
@@ -88,7 +89,10 @@ impl RedHatBoyState<Idle> {
         RedHatBoyState {
             context: RedHatBoyContext {
                 frame: 0,
-                position: Point { x: 0, y: FLOOR },
+                position: Point {
+                    x: STARTING_POINT,
+                    y: FLOOR,
+                },
                 velocity: Point { x: 0, y: 0 },
             },
             _state: Idle {},

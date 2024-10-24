@@ -10,8 +10,10 @@ pub(super) struct SheetRect {
 }
 
 #[derive(Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub(super) struct Cell {
     pub(super) frame: SheetRect,
+    pub(super) sprite_source_size: SheetRect,
 }
 
 #[derive(Deserialize, Clone)]
