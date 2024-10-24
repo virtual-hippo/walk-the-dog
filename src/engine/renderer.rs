@@ -52,11 +52,28 @@ impl Renderer {
                 destination.height.into(),
             )
             .expect("Drawing is throwing exceptions! Unrecoverable error.");
+        self.draw_rect(destination);
     }
 
     pub fn draw_entire_image(&self, image: &HtmlImageElement, position: &Point) {
         self.context
             .draw_image_with_html_image_element(image, position.x.into(), position.y.into())
             .expect("Drawing is throwing exceptions! Unrecoverable error.");
+        self.draw_rect(&Rect::new(
+            position.x.into(),
+            position.y.into(),
+            image.width() as f32,
+            image.height() as f32,
+        ));
+    }
+
+    fn draw_rect(&self, destination: &Rect) {
+        self.context.set_stroke_style_str("blue");
+        self.context.stroke_rect(
+            destination.x.into(),
+            destination.y.into(),
+            destination.width.into(),
+            destination.height.into(),
+        );
     }
 }
