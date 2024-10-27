@@ -18,6 +18,13 @@ impl Rect {
             height,
         }
     }
+
+    pub fn intersects(&self, other: &Rect) -> bool {
+        self.x < (other.x + other.width)
+            && (self.x + self.width) > other.x
+            && self.y < (other.y + other.height)
+            && (self.y + self.height) > other.y
+    }
 }
 
 pub struct Renderer {

@@ -7,11 +7,13 @@ const IDLE_FRAME_NAME: &str = "Idle";
 const RUN_FRAME_NAME: &str = "Run";
 const SLIDING_FRAME_NAME: &str = "Slide";
 const JUMPING_FRAME_NAME: &str = "Jump";
+const FALLING_FRAME_NAME: &str = "Dead";
 
 const IDLE_FRAMES: u8 = 29;
 const RUNNING_FRAMES: u8 = 23;
 const SLIDING_FRAMES: u8 = 14;
 const JUMPING_FRAMES: u8 = 35;
+const FALLING_FRAMES: u8 = 29;
 
 const RUNNING_SPEED: i16 = 3;
 const JUMP_SPEED: i16 = -25;
@@ -28,6 +30,10 @@ pub(super) struct Sliding;
 
 #[derive(Clone, Copy)]
 pub(super) struct Jumping;
+#[derive(Clone, Copy)]
+pub(super) struct Falling;
+#[derive(Clone, Copy)]
+pub(super) struct KnockedOut;
 
 #[derive(Clone, Copy)]
 pub(super) struct RedHatBoyContext {
@@ -68,6 +74,11 @@ impl RedHatBoyContext {
 
     fn set_vertical_velocity(mut self, y: i16) -> Self {
         self.velocity.y = y;
+        self
+    }
+
+    fn stop(mut self) -> Self {
+        self.velocity.x = 0;
         self
     }
 }
@@ -139,6 +150,13 @@ impl RedHatBoyState<Running> {
         self.context = self.context.update(RUNNING_FRAMES);
         self
     }
+
+    pub(super) fn knock_out(self) -> RedHatBoyState<Falling> {
+        RedHatBoyState {
+            context: self.context.reset_frame().stop(),
+            _state: Falling {},
+        }
+    }
 }
 
 pub(super) enum SlidingEndState {
@@ -165,6 +183,13 @@ impl RedHatBoyState<Sliding> {
             SlidingEndState::Complete(self.stand())
         } else {
             SlidingEndState::Sliding(self)
+        }
+    }
+
+    pub(super) fn knock_out(self) -> RedHatBoyState<Falling> {
+        RedHatBoyState {
+            context: self.context.reset_frame().stop(),
+            _state: Falling {},
         }
     }
 }
@@ -194,5 +219,45 @@ impl RedHatBoyState<Jumping> {
         } else {
             JumpingEndState::Jumping(self)
         }
+    }
+
+    pub(super) fn knock_out(self) -> RedHatBoyState<Falling> {
+        RedHatBoyState {
+            context: self.context.reset_frame().stop(),
+            _state: Falling {},
+        }
+    }
+}
+
+pub(super) enum FallingEndState {
+    Falling(RedHatBoyState<Falling>),
+    Complete(RedHatBoyState<KnockedOut>),
+}
+impl RedHatBoyState<Falling> {
+    pub(super) fn frame_name(&self) -> &str {
+        FALLING_FRAME_NAME
+    }
+
+    fn end(&self) -> RedHatBoyState<KnockedOut> {
+        RedHatBoyState {
+            context: self.context,
+            _state: KnockedOut {},
+        }
+    }
+
+    pub(super) fn update(mut self) -> FallingEndState {
+        self.context = self.context.update(FALLING_FRAMES);
+
+        if self.context.frame >= FALLING_FRAMES {
+            FallingEndState::Complete(self.end())
+        } else {
+            FallingEndState::Falling(self)
+        }
+    }
+}
+
+impl RedHatBoyState<KnockedOut> {
+    pub(super) fn frame_name(&self) -> &str {
+        FALLING_FRAME_NAME
     }
 }
