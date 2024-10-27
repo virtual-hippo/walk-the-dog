@@ -3,10 +3,10 @@ use web_sys::{CanvasRenderingContext2d, HtmlImageElement};
 use super::Point;
 
 pub struct Rect {
-    x: f32,
-    y: f32,
-    width: f32,
-    height: f32,
+    pub x: f32,
+    pub y: f32,
+    pub width: f32,
+    pub height: f32,
 }
 
 impl Rect {

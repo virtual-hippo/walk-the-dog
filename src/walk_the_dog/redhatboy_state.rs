@@ -1,7 +1,9 @@
+use super::game::HEIGHT;
 use crate::engine::Point;
 
 const FLOOR: i16 = 479;
 const STARTING_POINT: i16 = -20;
+const PLAYER_HEIGHT: i16 = HEIGHT - FLOOR;
 
 const IDLE_FRAME_NAME: &str = "Idle";
 const RUN_FRAME_NAME: &str = "Run";
@@ -18,6 +20,8 @@ const FALLING_FRAMES: u8 = 29;
 const RUNNING_SPEED: i16 = 3;
 const JUMP_SPEED: i16 = -25;
 const GRAVITY: i16 = 1;
+
+const TERMINAL_VELOCITY: i16 = 20;
 
 #[derive(Clone, Copy)]
 pub(super) struct Idle;
@@ -44,7 +48,9 @@ pub(super) struct RedHatBoyContext {
 
 impl RedHatBoyContext {
     pub(super) fn update(mut self, frame_count: u8) -> Self {
-        self.velocity.y += GRAVITY;
+        if self.velocity.y < TERMINAL_VELOCITY {
+            self.velocity.y += GRAVITY;
+        }
 
         if self.frame < frame_count {
             self.frame += 1;
@@ -69,6 +75,12 @@ impl RedHatBoyContext {
 
     fn run_right(mut self) -> Self {
         self.velocity.x += RUNNING_SPEED;
+        self
+    }
+
+    fn set_on(mut self, position: i16) -> Self {
+        let position = position - PLAYER_HEIGHT;
+        self.position.y = position;
         self
     }
 
@@ -142,6 +154,13 @@ impl RedHatBoyState<Running> {
         }
     }
 
+    pub(crate) fn land_on(self, position: f32) -> RedHatBoyState<Running> {
+        RedHatBoyState {
+            context: self.context.set_on(position as i16),
+            _state: Running {},
+        }
+    }
+
     pub(super) fn frame_name(&self) -> &str {
         RUN_FRAME_NAME
     }
@@ -169,6 +188,13 @@ impl RedHatBoyState<Sliding> {
         RedHatBoyState {
             context: self.context.reset_frame(),
             _state: Running {},
+        }
+    }
+
+    pub(crate) fn land_on(self, position: f32) -> RedHatBoyState<Sliding> {
+        RedHatBoyState {
+            context: self.context.set_on(position as i16),
+            _state: Sliding {},
         }
     }
 
@@ -200,9 +226,9 @@ pub(super) enum JumpingEndState {
 }
 
 impl RedHatBoyState<Jumping> {
-    fn land(self) -> RedHatBoyState<Running> {
+    pub(crate) fn land_on(self, position: f32) -> RedHatBoyState<Running> {
         RedHatBoyState {
-            context: self.context.reset_frame(),
+            context: self.context.reset_frame().set_on(position as i16),
             _state: Running {},
         }
     }
@@ -215,7 +241,7 @@ impl RedHatBoyState<Jumping> {
         self.context = self.context.update(JUMPING_FRAMES);
 
         if self.context.position.y >= FLOOR {
-            JumpingEndState::Landing(self.land())
+            JumpingEndState::Landing(self.land_on(HEIGHT.into()))
         } else {
             JumpingEndState::Jumping(self)
         }

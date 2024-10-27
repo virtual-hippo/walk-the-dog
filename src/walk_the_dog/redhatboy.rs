@@ -49,6 +49,10 @@ impl RedHatBoy {
         self.state_machine = self.state_machine.transition(Event::Jump);
     }
 
+    pub(super) fn land_on(&mut self, position: f32) {
+        self.state_machine = self.state_machine.transition(Event::Land(position));
+    }
+
     pub(super) fn knock_out(&mut self) {
         self.state_machine = self.state_machine.transition(Event::KnockOut);
     }
@@ -75,6 +79,14 @@ impl RedHatBoy {
     fn current_sprite(&self) -> Option<&Cell> {
         self.sprite_sheet.frames.get(&self.frame_name())
     }
+
+    pub(super) fn pos_y(&self) -> i16 {
+        self.state_machine.context().position.y
+    }
+
+    pub(super) fn velocity_y(&self) -> i16 {
+        self.state_machine.context().velocity.y
+    }
 }
 
 #[derive(Clone, Copy)]
@@ -89,10 +101,11 @@ enum RedHatBoyStateMachine {
 
 enum Event {
     Run,
-    Slide,
-    Update,
     Jump,
+    Slide,
     KnockOut,
+    Land(f32),
+    Update,
 }
 
 impl From<RedHatBoyState<Idle>> for RedHatBoyStateMachine {
@@ -164,15 +177,23 @@ impl RedHatBoyStateMachine {
             (RedHatBoyStateMachine::Idle(state), Event::Run) => state.run().into(),
             (RedHatBoyStateMachine::Running(state), Event::Slide) => state.slide().into(),
             (RedHatBoyStateMachine::Running(state), Event::Jump) => state.jump().into(),
-            (RedHatBoyStateMachine::Idle(state), Event::Update) => state.update().into(),
+            (RedHatBoyStateMachine::Running(state), Event::Land(position)) => {
+                state.land_on(position).into()
+            }
+            (RedHatBoyStateMachine::Sliding(state), Event::Land(position)) => {
+                state.land_on(position).into()
+            }
+            (RedHatBoyStateMachine::Jumping(state), Event::Land(position)) => {
+                state.land_on(position).into()
+            }
             (RedHatBoyStateMachine::Running(state), Event::KnockOut) => state.knock_out().into(),
             (RedHatBoyStateMachine::Sliding(state), Event::KnockOut) => state.knock_out().into(),
             (RedHatBoyStateMachine::Jumping(state), Event::KnockOut) => state.knock_out().into(),
+            (RedHatBoyStateMachine::Idle(state), Event::Update) => state.update().into(),
             (RedHatBoyStateMachine::Running(state), Event::Update) => state.update().into(),
             (RedHatBoyStateMachine::Sliding(state), Event::Update) => state.update().into(),
             (RedHatBoyStateMachine::Jumping(state), Event::Update) => state.update().into(),
             (RedHatBoyStateMachine::Falling(state), Event::Update) => state.update().into(),
-            // (RedHatBoyStateMachine::KnockedOut(state), Event::Update) => state.update().into(),
             _ => self,
         }
     }

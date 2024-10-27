@@ -1,10 +1,13 @@
 use crate::browser;
 use crate::engine;
+use crate::engine::Point;
 use crate::walk_the_dog::*;
 
 use anyhow::anyhow;
 use anyhow::Result;
 use async_trait::async_trait;
+
+pub(crate) const HEIGHT: i16 = 600;
 
 pub(crate) enum WalkTheDog {
     Loading,
@@ -15,6 +18,7 @@ pub(crate) struct Walk {
     boy: RedHatBoy,
     background: engine::Image,
     stone: engine::Image,
+    platform: Platform,
 }
 
 impl WalkTheDog {
@@ -32,10 +36,20 @@ impl engine::Game for WalkTheDog {
                     engine::load_image("BG.png").await?,
                     engine::Point { x: 0, y: 0 },
                 );
+
                 let stone = engine::Image::new(
                     engine::load_image("Stone.png").await?,
                     engine::Point { x: 150, y: 546 },
                 );
+
+                let platform = Platform::new(
+                    browser::fetch_json("tiles.json")
+                        .await?
+                        .into_serde::<Sheet>()?,
+                    engine::load_image("tiles.png").await?,
+                    Point { x: 200, y: 400 },
+                );
+
                 let boy = RedHatBoy::new(
                     browser::fetch_json("rhb.json")
                         .await?
@@ -46,6 +60,7 @@ impl engine::Game for WalkTheDog {
                     boy,
                     background,
                     stone,
+                    platform,
                 })))
             }
             WalkTheDog::Loaded(_) => Err(anyhow!("Error: Game is already initialized")),
@@ -70,6 +85,18 @@ impl engine::Game for WalkTheDog {
             if walk
                 .boy
                 .bounding_box()
+                .intersects(&walk.platform.bounding_box())
+            {
+                if walk.boy.velocity_y() > 0 && walk.boy.pos_y() < walk.platform.position.y {
+                    walk.boy.land_on(walk.platform.bounding_box().y);
+                } else {
+                    walk.boy.knock_out();
+                }
+            }
+
+            if walk
+                .boy
+                .bounding_box()
                 .intersects(walk.stone.bounding_box())
             {
                 walk.boy.knock_out();
@@ -81,8 +108,9 @@ impl engine::Game for WalkTheDog {
         renderer.clear(&engine::Rect::new(0.0, 0.0, 600.0, 600.0));
         if let WalkTheDog::Loaded(walk) = self {
             walk.background.draw(renderer);
-            walk.stone.draw(renderer);
             walk.boy.draw(renderer);
+            walk.stone.draw(renderer);
+            walk.platform.draw(renderer);
         }
     }
 }
