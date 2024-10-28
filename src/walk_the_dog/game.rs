@@ -9,6 +9,10 @@ use async_trait::async_trait;
 
 pub(crate) const HEIGHT: i16 = 600;
 
+pub(crate) const FIRST_PLATFORM: i16 = 370;
+pub(crate) const LOW_PLATFORM: i16 = 420;
+pub(crate) const HIGH_PLATFORM: i16 = 375;
+
 pub(crate) enum WalkTheDog {
     Loading,
     Loaded(Walk),
@@ -47,7 +51,10 @@ impl engine::Game for WalkTheDog {
                         .await?
                         .into_serde::<Sheet>()?,
                     engine::load_image("tiles.png").await?,
-                    Point { x: 200, y: 400 },
+                    Point {
+                        x: FIRST_PLATFORM,
+                        y: LOW_PLATFORM,
+                    },
                 );
 
                 let boy = RedHatBoy::new(
@@ -82,25 +89,23 @@ impl engine::Game for WalkTheDog {
 
             walk.boy.update();
 
-            if walk
-                .boy
-                .bounding_box()
-                .intersects(&walk.platform.bounding_box())
-            {
-                if walk.boy.velocity_y() > 0 && walk.boy.pos_y() < walk.platform.position.y {
-                    walk.boy.land_on(walk.platform.bounding_box().y);
-                } else {
-                    walk.boy.knock_out();
+            for bounding_box in &walk.platform.bounding_boxes() {
+                if walk.boy.bounding_box().intersects(bounding_box) {
+                    if walk.boy.velocity_y() > 0 && walk.boy.pos_y() < walk.platform.position.y {
+                        walk.boy.land_on(bounding_box.y);
+                    } else {
+                        walk.boy.knock_out();
+                    }
                 }
             }
 
-            if walk
-                .boy
-                .bounding_box()
-                .intersects(walk.stone.bounding_box())
-            {
-                walk.boy.knock_out();
-            }
+            // if walk
+            //     .boy
+            //     .bounding_box()
+            //     .intersects(walk.stone.bounding_box())
+            // {
+            //     walk.boy.knock_out();
+            // }
         }
     }
 

@@ -35,11 +35,15 @@ impl Platform {
                 (platform.frame.w * 3).into(),
                 platform.frame.h.into(),
             ),
-            &self.bounding_box(),
+            &self.destination_box(),
         );
+
+        for bounding_box in &self.bounding_boxes() {
+            renderer.draw_rect(bounding_box);
+        }
     }
 
-    pub(crate) fn bounding_box(&self) -> Rect {
+    pub(crate) fn destination_box(&self) -> Rect {
         let platform = self
             .sheet
             .frames
@@ -52,5 +56,26 @@ impl Platform {
             (platform.frame.w * 3).into(),
             platform.frame.h.into(),
         )
+    }
+
+    pub(crate) fn bounding_boxes(&self) -> Vec<Rect> {
+        const X_OFFSET: f32 = 60.0;
+        const END_HEIGHT: f32 = 54.0;
+        let destination_box = self.destination_box();
+        vec![
+            Rect::new(destination_box.x, destination_box.y, X_OFFSET, END_HEIGHT),
+            Rect::new(
+                destination_box.x + X_OFFSET,
+                destination_box.y,
+                destination_box.width - (X_OFFSET * 2.0),
+                destination_box.height,
+            ),
+            Rect::new(
+                destination_box.x + destination_box.width - X_OFFSET,
+                destination_box.y,
+                X_OFFSET,
+                END_HEIGHT,
+            ),
+        ]
     }
 }

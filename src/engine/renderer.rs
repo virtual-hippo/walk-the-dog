@@ -59,7 +59,6 @@ impl Renderer {
                 destination.height.into(),
             )
             .expect("Drawing is throwing exceptions! Unrecoverable error.");
-        self.draw_rect(destination);
     }
 
     pub fn draw_entire_image(&self, image: &HtmlImageElement, position: &Point) {
@@ -74,7 +73,7 @@ impl Renderer {
         ));
     }
 
-    fn draw_rect(&self, destination: &Rect) {
+    pub fn draw_rect(&self, destination: &Rect) {
         self.context.set_stroke_style_str("blue");
         self.context.stroke_rect(
             destination.x.into(),

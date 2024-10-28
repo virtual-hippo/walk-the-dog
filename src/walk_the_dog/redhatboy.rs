@@ -33,8 +33,9 @@ impl RedHatBoy {
                 splite.frame.w.into(),
                 splite.frame.h.into(),
             ),
-            &self.bounding_box(),
+            &self.destination_box(),
         );
+        renderer.draw_rect(&self.bounding_box());
     }
 
     pub(super) fn run_right(&mut self) {
@@ -57,7 +58,7 @@ impl RedHatBoy {
         self.state_machine = self.state_machine.transition(Event::KnockOut);
     }
 
-    pub(super) fn bounding_box(&self) -> Rect {
+    pub(super) fn destination_box(&self) -> Rect {
         let splite = self.current_sprite().expect("Cell not found");
 
         Rect::new(
@@ -66,6 +67,19 @@ impl RedHatBoy {
             splite.frame.w.into(),
             splite.frame.h.into(),
         )
+    }
+
+    pub(super) fn bounding_box(&self) -> Rect {
+        const X_OFFSET: f32 = 18.0;
+        const Y_OFFSET: f32 = 14.0;
+        const WIDTH_OFFSET: f32 = 28.0;
+
+        let mut bounding_box = self.destination_box();
+        bounding_box.x += X_OFFSET;
+        bounding_box.width -= WIDTH_OFFSET;
+        bounding_box.y += Y_OFFSET;
+        bounding_box.height -= Y_OFFSET;
+        bounding_box
     }
 
     fn frame_name(&self) -> String {
