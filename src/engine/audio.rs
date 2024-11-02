@@ -24,7 +24,11 @@ impl Audio {
     }
 
     pub(crate) fn play_sound(&self, sound: &Sound) -> Result<()> {
-        sound::play_sound(&self.context, &sound.buffer)
+        sound::play_sound(&self.context, &sound.buffer, sound::LOOPING::NO)
+    }
+
+    pub(crate) fn play_looping_sound(&self, sound: &Sound) -> Result<()> {
+        sound::play_sound(&self.context, &sound.buffer, sound::LOOPING::YES)
     }
 }
 
