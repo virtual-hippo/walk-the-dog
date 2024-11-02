@@ -1,5 +1,6 @@
 use crate::browser;
 use crate::engine::{self, Game, Image, Point, Rect, Renderer, Sheet, SpriteSheet};
+use crate::segment::stone_and_platform;
 use crate::walk_the_dog::*;
 
 use anyhow::anyhow;
@@ -8,10 +9,6 @@ use async_trait::async_trait;
 use std::rc::Rc;
 
 pub(crate) const HEIGHT: i16 = 600;
-
-pub(crate) const FIRST_PLATFORM: i16 = 370;
-pub(crate) const LOW_PLATFORM: i16 = 420;
-pub(crate) const HIGH_PLATFORM: i16 = 375;
 
 pub(crate) enum WalkTheDog {
     Loading,
@@ -55,30 +52,13 @@ impl Game for WalkTheDog {
                     ),
                 ];
 
-                let stone_image = Image::new(
-                    engine::load_image("Stone.png").await?,
-                    Point { x: 150, y: 546 },
-                );
+                let stone = engine::load_image("Stone.png").await?;
 
                 let tiles = browser::fetch_json("tiles.json").await?;
                 let obstacle_sheet = Rc::new(SpriteSheet::new(
                     tiles.into_serde::<Sheet>()?,
                     engine::load_image("tiles.png").await?,
                 ));
-
-                let platform = Platform::new(
-                    obstacle_sheet.clone(),
-                    Point {
-                        x: FIRST_PLATFORM,
-                        y: LOW_PLATFORM,
-                    },
-                    &["13.png", "14.png", "15.png"],
-                    &[
-                        Rect::new_from_x_y(0, 0, 60, 54),
-                        Rect::new_from_x_y(60, 0, 384 - (60 * 2), 93),
-                        Rect::new_from_x_y(384 - 60, 0, 60, 54),
-                    ],
-                );
 
                 let boy = RedHatBoy::new(
                     browser::fetch_json("rhb.json")
@@ -87,14 +67,11 @@ impl Game for WalkTheDog {
                     engine::load_image("rhb.png").await?,
                 );
 
-                let obstacles: Vec<Box<dyn Obstacle>> =
-                    vec![Box::new(Barrier::new(stone_image)), Box::new(platform)];
-
                 Ok(Box::new(WalkTheDog::Loaded(Walk {
                     boy,
                     backgrounds,
+                    obstacles: stone_and_platform(stone, obstacle_sheet.clone(), 0),
                     obstacle_sheet,
-                    obstacles,
                 })))
             }
             WalkTheDog::Loaded(_) => Err(anyhow!("Error: Game is already initialized")),
@@ -137,7 +114,7 @@ impl Game for WalkTheDog {
     }
 
     fn draw(&mut self, renderer: &Renderer) {
-        renderer.clear(&&Rect::new_from_x_y(0, 0, 600, 600));
+        renderer.clear(&&Rect::new_from_x_y(0, 0, 600, HEIGHT));
         if let WalkTheDog::Loaded(walk) = self {
             walk.backgrounds.iter().for_each(|bg| bg.draw(renderer));
             walk.boy.draw(renderer);

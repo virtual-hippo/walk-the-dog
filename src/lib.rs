@@ -1,6 +1,7 @@
 #[macro_use]
 mod browser;
 mod engine;
+mod segment;
 mod walk_the_dog;
 
 use anyhow::Result;
