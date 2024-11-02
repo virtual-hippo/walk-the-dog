@@ -17,7 +17,7 @@ const SLIDING_FRAMES: u8 = 14;
 const JUMPING_FRAMES: u8 = 35;
 const FALLING_FRAMES: u8 = 29;
 
-const RUNNING_SPEED: i16 = 3;
+const RUNNING_SPEED: i16 = 4;
 const JUMP_SPEED: i16 = -25;
 const GRAVITY: i16 = 1;
 

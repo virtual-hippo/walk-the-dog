@@ -1,5 +1,6 @@
 use super::Point;
 
+#[derive(Default)]
 pub struct Rect {
     pub position: Point,
     pub width: i16,

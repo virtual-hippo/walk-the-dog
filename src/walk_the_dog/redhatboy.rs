@@ -1,4 +1,4 @@
-use crate::engine::{Rect, Renderer};
+use crate::engine::{Cell, Rect, Renderer, Sheet};
 use crate::walk_the_dog::*;
 
 use web_sys::HtmlImageElement;

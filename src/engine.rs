@@ -6,6 +6,8 @@ pub mod load_asset;
 pub mod point;
 pub mod rect;
 pub mod renderer;
+pub mod sheet;
+pub mod sprite_sheet;
 
 pub use game::*;
 pub use game_loop::*;
@@ -15,3 +17,5 @@ pub use load_asset::*;
 pub use point::*;
 pub use rect::*;
 pub use renderer::*;
+pub(crate) use sheet::*;
+pub(crate) use sprite_sheet::*;
