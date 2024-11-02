@@ -154,9 +154,9 @@ impl RedHatBoyState<Running> {
         }
     }
 
-    pub(crate) fn land_on(self, position: f32) -> RedHatBoyState<Running> {
+    pub(crate) fn land_on(self, position: i16) -> RedHatBoyState<Running> {
         RedHatBoyState {
-            context: self.context.set_on(position as i16),
+            context: self.context.set_on(position),
             _state: Running {},
         }
     }
@@ -191,9 +191,9 @@ impl RedHatBoyState<Sliding> {
         }
     }
 
-    pub(crate) fn land_on(self, position: f32) -> RedHatBoyState<Sliding> {
+    pub(crate) fn land_on(self, position: i16) -> RedHatBoyState<Sliding> {
         RedHatBoyState {
-            context: self.context.set_on(position as i16),
+            context: self.context.set_on(position),
             _state: Sliding {},
         }
     }
@@ -226,9 +226,9 @@ pub(super) enum JumpingEndState {
 }
 
 impl RedHatBoyState<Jumping> {
-    pub(crate) fn land_on(self, position: f32) -> RedHatBoyState<Running> {
+    pub(crate) fn land_on(self, position: i16) -> RedHatBoyState<Running> {
         RedHatBoyState {
-            context: self.context.reset_frame().set_on(position as i16),
+            context: self.context.reset_frame().set_on(position),
             _state: Running {},
         }
     }
@@ -241,7 +241,7 @@ impl RedHatBoyState<Jumping> {
         self.context = self.context.update(JUMPING_FRAMES);
 
         if self.context.position.y >= FLOOR {
-            JumpingEndState::Landing(self.land_on(HEIGHT.into()))
+            JumpingEndState::Landing(self.land_on(HEIGHT))
         } else {
             JumpingEndState::Jumping(self)
         }

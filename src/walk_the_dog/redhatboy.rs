@@ -27,11 +27,11 @@ impl RedHatBoy {
 
         let _ = renderer.draw_image(
             &self.image,
-            &Rect::new(
-                splite.frame.x.into(),
-                splite.frame.y.into(),
-                splite.frame.w.into(),
-                splite.frame.h.into(),
+            &&Rect::new_from_x_y(
+                splite.frame.x,
+                splite.frame.y,
+                splite.frame.w,
+                splite.frame.h,
             ),
             &self.destination_box(),
         );
@@ -50,7 +50,7 @@ impl RedHatBoy {
         self.state_machine = self.state_machine.transition(Event::Jump);
     }
 
-    pub(super) fn land_on(&mut self, position: f32) {
+    pub(super) fn land_on(&mut self, position: i16) {
         self.state_machine = self.state_machine.transition(Event::Land(position));
     }
 
@@ -61,24 +61,26 @@ impl RedHatBoy {
     pub(super) fn destination_box(&self) -> Rect {
         let splite = self.current_sprite().expect("Cell not found");
 
-        Rect::new(
-            (self.state_machine.context().position.x + splite.sprite_source_size.x as i16).into(),
-            (self.state_machine.context().position.y + splite.sprite_source_size.y as i16).into(),
-            splite.frame.w.into(),
-            splite.frame.h.into(),
+        Rect::new_from_x_y(
+            self.state_machine.context().position.x + splite.sprite_source_size.x as i16,
+            self.state_machine.context().position.y + splite.sprite_source_size.y as i16,
+            splite.frame.w,
+            splite.frame.h,
         )
     }
 
     pub(super) fn bounding_box(&self) -> Rect {
-        const X_OFFSET: f32 = 18.0;
-        const Y_OFFSET: f32 = 14.0;
-        const WIDTH_OFFSET: f32 = 28.0;
+        const X_OFFSET: i16 = 18;
+        const Y_OFFSET: i16 = 14;
+        const WIDTH_OFFSET: i16 = 28;
 
         let mut bounding_box = self.destination_box();
-        bounding_box.x += X_OFFSET;
+        bounding_box.set_x(bounding_box.x() + X_OFFSET);
         bounding_box.width -= WIDTH_OFFSET;
-        bounding_box.y += Y_OFFSET;
+
+        bounding_box.set_y(bounding_box.y() + Y_OFFSET);
         bounding_box.height -= Y_OFFSET;
+
         bounding_box
     }
 
@@ -122,7 +124,7 @@ enum Event {
     Jump,
     Slide,
     KnockOut,
-    Land(f32),
+    Land(i16),
     Update,
 }
 

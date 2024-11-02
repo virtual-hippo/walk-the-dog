@@ -29,11 +29,11 @@ impl Platform {
 
         renderer.draw_image(
             &self.image,
-            &Rect::new(
-                platform.frame.x.into(),
-                platform.frame.y.into(),
-                (platform.frame.w * 3).into(),
-                platform.frame.h.into(),
+            &&Rect::new_from_x_y(
+                platform.frame.x,
+                platform.frame.y,
+                platform.frame.w * 3,
+                platform.frame.h,
             ),
             &self.destination_box(),
         );
@@ -50,29 +50,29 @@ impl Platform {
             .get("13.png")
             .expect("13.png does not exist");
 
-        Rect::new(
-            self.position.x.into(),
-            self.position.y.into(),
-            (platform.frame.w * 3).into(),
-            platform.frame.h.into(),
-        )
+        Rect::new(self.position, platform.frame.w * 3, platform.frame.h)
     }
 
     pub(crate) fn bounding_boxes(&self) -> Vec<Rect> {
-        const X_OFFSET: f32 = 60.0;
-        const END_HEIGHT: f32 = 54.0;
+        const X_OFFSET: i16 = 60;
+        const END_HEIGHT: i16 = 54;
         let destination_box = self.destination_box();
         vec![
-            Rect::new(destination_box.x, destination_box.y, X_OFFSET, END_HEIGHT),
-            Rect::new(
-                destination_box.x + X_OFFSET,
-                destination_box.y,
-                destination_box.width - (X_OFFSET * 2.0),
+            Rect::new_from_x_y(
+                destination_box.x(),
+                destination_box.y(),
+                X_OFFSET,
+                END_HEIGHT,
+            ),
+            Rect::new_from_x_y(
+                destination_box.x() + X_OFFSET,
+                destination_box.y(),
+                destination_box.width - (X_OFFSET * 2),
                 destination_box.height,
             ),
-            Rect::new(
-                destination_box.x + destination_box.width - X_OFFSET,
-                destination_box.y,
+            Rect::new_from_x_y(
+                destination_box.x() + destination_box.width - X_OFFSET,
+                destination_box.y(),
                 X_OFFSET,
                 END_HEIGHT,
             ),

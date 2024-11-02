@@ -122,7 +122,7 @@ impl engine::Game for WalkTheDog {
             for bounding_box in &walk.platform.bounding_boxes() {
                 if walk.boy.bounding_box().intersects(bounding_box) {
                     if walk.boy.velocity_y() > 0 && walk.boy.pos_y() < walk.platform.position.y {
-                        walk.boy.land_on(bounding_box.y);
+                        walk.boy.land_on(bounding_box.y());
                     } else {
                         walk.boy.knock_out();
                     }
@@ -140,7 +140,7 @@ impl engine::Game for WalkTheDog {
     }
 
     fn draw(&mut self, renderer: &engine::Renderer) {
-        renderer.clear(&engine::Rect::new(0.0, 0.0, 600.0, 600.0));
+        renderer.clear(&&engine::Rect::new_from_x_y(0, 0, 600, 600));
         if let WalkTheDog::Loaded(walk) = self {
             walk.backgrounds.iter().for_each(|bg| bg.draw(renderer));
             walk.boy.draw(renderer);
