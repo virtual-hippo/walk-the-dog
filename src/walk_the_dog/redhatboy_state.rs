@@ -58,7 +58,6 @@ impl RedHatBoyContext {
             self.frame = 0;
         }
 
-        self.position.x += self.velocity.x;
         self.position.y += self.velocity.y;
 
         if self.position.y > FLOOR {

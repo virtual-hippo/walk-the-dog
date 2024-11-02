@@ -1,5 +1,6 @@
 use crate::browser;
 use crate::engine;
+use crate::engine::Image;
 use crate::engine::Point;
 use crate::walk_the_dog::*;
 
@@ -20,9 +21,15 @@ pub(crate) enum WalkTheDog {
 
 pub(crate) struct Walk {
     boy: RedHatBoy,
-    background: engine::Image,
+    backgrounds: [engine::Image; 2],
     stone: engine::Image,
     platform: Platform,
+}
+
+impl Walk {
+    fn velocity(&self) -> i16 {
+        -self.boy.walking_speed()
+    }
 }
 
 impl WalkTheDog {
@@ -36,10 +43,18 @@ impl engine::Game for WalkTheDog {
     async fn initialize(&self) -> Result<Box<dyn engine::Game>> {
         match self {
             WalkTheDog::Loading => {
-                let background = engine::Image::new(
-                    engine::load_image("BG.png").await?,
-                    engine::Point { x: 0, y: 0 },
-                );
+                let background = engine::load_image("BG.png").await?;
+                let background_width = background.width() as i16;
+                let backgrounds = [
+                    Image::new(background.clone(), engine::Point { x: 0, y: 0 }),
+                    Image::new(
+                        background,
+                        engine::Point {
+                            x: background_width,
+                            y: 0,
+                        },
+                    ),
+                ];
 
                 let stone = engine::Image::new(
                     engine::load_image("Stone.png").await?,
@@ -65,7 +80,7 @@ impl engine::Game for WalkTheDog {
                 );
                 Ok(Box::new(WalkTheDog::Loaded(Walk {
                     boy,
-                    background,
+                    backgrounds,
                     stone,
                     platform,
                 })))
@@ -88,6 +103,21 @@ impl engine::Game for WalkTheDog {
             if keystate.is_pressed("ArrowLeft") {}
 
             walk.boy.update();
+
+            walk.platform.position.x += walk.velocity();
+            walk.stone.move_horizontally(walk.velocity());
+
+            let velocity = walk.velocity();
+            let [first_bg, second_bg] = &mut walk.backgrounds;
+            first_bg.move_horizontally(velocity);
+            second_bg.move_horizontally(velocity);
+
+            if first_bg.right() < 0 {
+                first_bg.set_x(second_bg.right());
+            }
+            if second_bg.right() < 0 {
+                second_bg.set_x(first_bg.right());
+            }
 
             for bounding_box in &walk.platform.bounding_boxes() {
                 if walk.boy.bounding_box().intersects(bounding_box) {
@@ -112,7 +142,7 @@ impl engine::Game for WalkTheDog {
     fn draw(&mut self, renderer: &engine::Renderer) {
         renderer.clear(&engine::Rect::new(0.0, 0.0, 600.0, 600.0));
         if let WalkTheDog::Loaded(walk) = self {
-            walk.background.draw(renderer);
+            walk.backgrounds.iter().for_each(|bg| bg.draw(renderer));
             walk.boy.draw(renderer);
             walk.stone.draw(renderer);
             walk.platform.draw(renderer);

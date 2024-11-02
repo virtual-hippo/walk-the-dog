@@ -30,4 +30,17 @@ impl Image {
     pub(crate) fn bounding_box(&self) -> &Rect {
         &self.bounding_box
     }
+
+    pub(crate) fn move_horizontally(&mut self, distance: i16) {
+        self.set_x(self.position.x + distance);
+    }
+
+    pub(crate) fn set_x(&mut self, x: i16) {
+        self.bounding_box.x = x as f32;
+        self.position.x = x;
+    }
+
+    pub(crate) fn right(&self) -> i16 {
+        (self.bounding_box.x + self.bounding_box.width) as i16
+    }
 }

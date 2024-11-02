@@ -101,6 +101,10 @@ impl RedHatBoy {
     pub(super) fn velocity_y(&self) -> i16 {
         self.state_machine.context().velocity.y
     }
+
+    pub(super) fn walking_speed(&self) -> i16 {
+        self.state_machine.context().velocity.x
+    }
 }
 
 #[derive(Clone, Copy)]
