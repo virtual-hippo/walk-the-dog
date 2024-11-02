@@ -1,4 +1,4 @@
-use crate::engine::{Cell, Rect, Renderer, Sheet};
+use crate::engine::{Audio, Cell, Rect, Renderer, Sheet, Sound};
 use crate::walk_the_dog::*;
 
 use web_sys::HtmlImageElement;
@@ -10,36 +10,41 @@ pub(crate) struct RedHatBoy {
 }
 
 impl RedHatBoy {
-    pub(super) fn new(sprite_sheet: Sheet, image: HtmlImageElement) -> Self {
+    pub(super) fn new(
+        sprite_sheet: Sheet,
+        image: HtmlImageElement,
+        audio: Audio,
+        jump_sound: Sound,
+    ) -> Self {
         RedHatBoy {
-            state_machine: RedHatBoyStateMachine::Idle(RedHatBoyState::new()),
+            state_machine: RedHatBoyStateMachine::Idle(RedHatBoyState::new(audio, jump_sound)),
             sprite_sheet,
             image,
         }
     }
 
     pub(super) fn run_right(&mut self) {
-        self.state_machine = self.state_machine.transition(Event::Run);
+        self.state_machine = self.state_machine.clone().transition(Event::Run);
     }
 
     pub(super) fn slide(&mut self) {
-        self.state_machine = self.state_machine.transition(Event::Slide);
+        self.state_machine = self.state_machine.clone().transition(Event::Slide);
     }
 
     pub(super) fn jump(&mut self) {
-        self.state_machine = self.state_machine.transition(Event::Jump);
+        self.state_machine = self.state_machine.clone().transition(Event::Jump);
     }
 
     pub(super) fn knock_out(&mut self) {
-        self.state_machine = self.state_machine.transition(Event::KnockOut);
+        self.state_machine = self.state_machine.clone().transition(Event::KnockOut);
     }
 
     pub(super) fn land_on(&mut self, position: i16) {
-        self.state_machine = self.state_machine.transition(Event::Land(position));
+        self.state_machine = self.state_machine.clone().transition(Event::Land(position));
     }
 
     pub(super) fn update(&mut self) {
-        self.state_machine = self.state_machine.update();
+        self.state_machine = self.state_machine.clone().update();
     }
 
     pub(super) fn pos_y(&self) -> i16 {
@@ -106,7 +111,7 @@ impl RedHatBoy {
     }
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 enum RedHatBoyStateMachine {
     Idle(RedHatBoyState<Idle>),
     Running(RedHatBoyState<Running>),
@@ -127,7 +132,7 @@ enum Event {
 
 impl RedHatBoyStateMachine {
     fn transition(self, event: Event) -> Self {
-        match (self, event) {
+        match (self.clone(), event) {
             (RedHatBoyStateMachine::Idle(state), Event::Run) => state.run().into(),
             (RedHatBoyStateMachine::Running(state), Event::Jump) => state.jump().into(),
             (RedHatBoyStateMachine::Running(state), Event::Slide) => state.slide().into(),

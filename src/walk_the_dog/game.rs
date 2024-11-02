@@ -6,7 +6,7 @@ use web_sys::HtmlImageElement;
 
 use crate::{
     browser,
-    engine::{self, Game, Image, KeyState, Point, Rect, Renderer, Sheet, SpriteSheet},
+    engine::{self, Audio, Game, Image, KeyState, Point, Rect, Renderer, Sheet, SpriteSheet},
     segment::*,
     walk_the_dog::*,
 };
@@ -82,7 +82,15 @@ impl Game for WalkTheDog {
                     engine::load_image("tiles.png").await?,
                 ));
 
-                let boy = RedHatBoy::new(rhb_sheet, engine::load_image("rhb.png").await?);
+                let audio = Audio::new()?;
+                let sound = audio.load_sound("SFX_Jump_23.mp3").await?;
+
+                let boy = RedHatBoy::new(
+                    rhb_sheet,
+                    engine::load_image("rhb.png").await?,
+                    audio,
+                    sound,
+                );
 
                 let background_width = background.width() as i16;
                 let starting_obstacles =

@@ -1,5 +1,5 @@
 use super::game::HEIGHT;
-use crate::engine::Point;
+use crate::engine::{Audio, Point, Sound};
 
 const FLOOR: i16 = 479;
 const PLAYER_HEIGHT: i16 = HEIGHT - FLOOR;
@@ -22,7 +22,7 @@ const GRAVITY: i16 = 1;
 
 const TERMINAL_VELOCITY: i16 = 20;
 
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 pub(super) struct RedHatBoyState<S> {
     context: RedHatBoyContext,
     _state: S,
@@ -34,15 +34,15 @@ impl<S> RedHatBoyState<S> {
     }
 
     fn update_context(&mut self, frames: u8) {
-        self.context = self.context.update(frames);
+        self.context = self.context.clone().update(frames);
     }
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 pub(super) struct Idle;
 
 impl RedHatBoyState<Idle> {
-    pub(super) fn new() -> Self {
+    pub(super) fn new(audio: Audio, jump_sound: Sound) -> Self {
         RedHatBoyState {
             context: RedHatBoyContext {
                 frame: 0,
@@ -51,6 +51,8 @@ impl RedHatBoyState<Idle> {
                     y: FLOOR,
                 },
                 velocity: Point { x: 0, y: 0 },
+                audio,
+                jump_sound,
             },
             _state: Idle {},
         }
@@ -73,7 +75,7 @@ impl RedHatBoyState<Idle> {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Clone)]
 pub(super) struct Running;
 
 impl RedHatBoyState<Running> {
@@ -88,7 +90,11 @@ impl RedHatBoyState<Running> {
 
     pub(super) fn jump(self) -> RedHatBoyState<Jumping> {
         RedHatBoyState {
-            context: self.context.reset_frame().set_vertical_velocity(JUMP_SPEED),
+            context: self
+                .context
+                .reset_frame()
+                .set_vertical_velocity(JUMP_SPEED)
+                .play_jump_sound(),
             _state: Jumping {},
         }
     }
@@ -115,7 +121,7 @@ impl RedHatBoyState<Running> {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Clone)]
 pub(super) struct Jumping;
 
 pub(super) enum JumpingEndState {
@@ -153,7 +159,7 @@ impl RedHatBoyState<Jumping> {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Clone)]
 pub(super) struct Sliding;
 
 pub(super) enum SlidingEndState {
@@ -198,7 +204,7 @@ impl RedHatBoyState<Sliding> {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Clone)]
 pub(super) struct Falling;
 impl RedHatBoyState<Falling> {
     pub(super) fn frame_name(&self) -> &str {
@@ -207,7 +213,7 @@ impl RedHatBoyState<Falling> {
 
     fn end(&self) -> RedHatBoyState<KnockedOut> {
         RedHatBoyState {
-            context: self.context,
+            context: self.context.clone(),
             _state: KnockedOut {},
         }
     }
@@ -227,7 +233,7 @@ pub(super) enum FallingEndState {
     Falling(RedHatBoyState<Falling>),
 }
 
-#[derive(Copy, Clone)]
+#[derive(Clone)]
 pub(super) struct KnockedOut;
 
 impl RedHatBoyState<KnockedOut> {
@@ -236,11 +242,13 @@ impl RedHatBoyState<KnockedOut> {
     }
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 pub(super) struct RedHatBoyContext {
     pub(super) frame: u8,
     pub(super) position: Point,
     pub(super) velocity: Point,
+    pub(super) audio: Audio,
+    pub(super) jump_sound: Sound,
 }
 
 impl RedHatBoyContext {
@@ -288,6 +296,13 @@ impl RedHatBoyContext {
     fn set_on(mut self, position: i16) -> Self {
         let position = position - PLAYER_HEIGHT;
         self.position.y = position;
+        self
+    }
+
+    fn play_jump_sound(self) -> Self {
+        if let Err(err) = self.audio.play_sound(&self.jump_sound) {
+            log!("Error playing jump sound {:#?}", err);
+        }
         self
     }
 }
