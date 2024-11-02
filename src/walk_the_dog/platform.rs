@@ -23,6 +23,7 @@ impl Platform {
             .iter()
             .filter_map(|sprite_name| sheet.cell(&sprite_name).cloned())
             .collect();
+
         let bounding_boxes = bounding_boxes
             .iter()
             .map(|bounding_box| {
@@ -41,6 +42,7 @@ impl Platform {
             bounding_boxes,
         }
     }
+
     pub(crate) fn bounding_boxes(&self) -> &Vec<Rect> {
         &self.bounding_boxes
     }

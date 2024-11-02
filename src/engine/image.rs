@@ -10,6 +10,7 @@ pub(crate) struct Image {
 impl Image {
     pub(crate) fn new(element: HtmlImageElement, position: Point) -> Self {
         let bounding_box = Rect::new(position, element.width() as i16, element.height() as i16);
+
         Self {
             element,
             bounding_box,
