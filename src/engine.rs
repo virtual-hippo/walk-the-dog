@@ -1,3 +1,4 @@
+pub mod audio;
 pub mod game;
 pub mod game_loop;
 pub mod image;
@@ -9,6 +10,7 @@ pub mod renderer;
 pub mod sheet;
 pub mod sprite_sheet;
 
+pub(crate) use audio::*;
 pub use game::*;
 pub use game_loop::*;
 pub(crate) use image::Image;

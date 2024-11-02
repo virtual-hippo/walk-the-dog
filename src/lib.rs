@@ -2,6 +2,7 @@
 mod browser;
 mod engine;
 mod segment;
+mod sound;
 mod walk_the_dog;
 
 use anyhow::Result;
