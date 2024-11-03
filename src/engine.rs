@@ -1,4 +1,5 @@
 pub mod audio;
+pub mod click_event;
 pub mod game;
 pub mod game_loop;
 pub mod image;
@@ -11,6 +12,7 @@ pub mod sheet;
 pub mod sprite_sheet;
 
 pub(crate) use audio::*;
+pub(crate) use click_event::*;
 pub use game::*;
 pub use game_loop::*;
 pub(crate) use image::Image;
