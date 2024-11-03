@@ -34,6 +34,65 @@ pub(crate) struct Walk {
 }
 
 impl Walk {
+    async fn new() -> Result<Self> {
+        let rhb_sheet = from_value::<Sheet>(browser::fetch_json("rhb.json").await?)
+            .map_err(|e| anyhow!("Failed to converting json to Sheet {}:#?", e))?;
+
+        let background = engine::load_image("BG.png").await?;
+        let stone = engine::load_image("Stone.png").await?;
+
+        let tiles = browser::fetch_json("tiles.json").await?;
+
+        let obstacle_sheet = Rc::new(SpriteSheet::new(
+            from_value::<Sheet>(tiles)
+                .map_err(|e| anyhow!("Failed to converting json to Sheet {}:#?", e))?,
+            engine::load_image("tiles.png").await?,
+        ));
+
+        let audio = Audio::new()?;
+        let sound = audio.load_sound("SFX_Jump_23.mp3").await?;
+        let background_music = audio.load_sound("background_song.mp3").await?;
+        audio.play_looping_sound(&background_music)?;
+
+        let boy = RedHatBoy::new(
+            rhb_sheet,
+            engine::load_image("rhb.png").await?,
+            audio,
+            sound,
+        );
+
+        let background_width = background.width() as i16;
+        let (obstacles, timeline) = Self::starting_obstacles_and_timeline(stone.clone(), 0);
+
+        Ok(Self {
+            boy,
+            backgrounds: [
+                Image::new(background.clone(), Point { x: 0, y: 0 }),
+                Image::new(
+                    background,
+                    Point {
+                        x: background_width,
+                        y: 0,
+                    },
+                ),
+            ],
+            obstacles,
+            obstacle_sheet,
+            stone,
+            timeline,
+        })
+    }
+
+    fn starting_obstacles_and_timeline(
+        stone: HtmlImageElement,
+        offset_x: i16,
+    ) -> (Vec<Box<dyn Obstacle>>, i16) {
+        const STARTING_TIMELINE_BUFFER: i16 = 200;
+        let obstacles = one_stone(stone, offset_x + OBSTACLE_BUFFER);
+        let timeline = rightmost(&obstacles) + STARTING_TIMELINE_BUFFER;
+        (obstacles, timeline)
+    }
+
     pub(super) fn velocity(&self) -> i16 {
         -self.boy.walking_speed()
     }
@@ -76,13 +135,11 @@ impl Walk {
     }
 
     pub(super) fn reset(walk: Self) -> Self {
-        let starting_obstacles =
-            stone_and_platform(walk.stone.clone(), walk.obstacle_sheet.clone(), 0);
-        let timeline = rightmost(&starting_obstacles);
+        let (obstacles, timeline) = Self::starting_obstacles_and_timeline(walk.stone.clone(), 0);
         Walk {
             boy: RedHatBoy::reset(walk.boy),
             backgrounds: walk.backgrounds,
-            obstacles: starting_obstacles,
+            obstacles,
             obstacle_sheet: walk.obstacle_sheet,
             stone: walk.stone,
             timeline,
@@ -95,55 +152,7 @@ impl Game for WalkTheDog {
     async fn initialize(&self) -> Result<Box<dyn Game>> {
         match self.machine {
             None => {
-                let rhb_sheet = from_value::<Sheet>(browser::fetch_json("rhb.json").await?)
-                    .map_err(|e| anyhow!("Failed to converting json to Sheet {}:#?", e))?;
-
-                let background = engine::load_image("BG.png").await?;
-                let stone = engine::load_image("Stone.png").await?;
-
-                let tiles = browser::fetch_json("tiles.json").await?;
-
-                let obstacle_sheet = Rc::new(SpriteSheet::new(
-                    from_value::<Sheet>(tiles)
-                        .map_err(|e| anyhow!("Failed to converting json to Sheet {}:#?", e))?,
-                    engine::load_image("tiles.png").await?,
-                ));
-
-                let audio = Audio::new()?;
-                let sound = audio.load_sound("SFX_Jump_23.mp3").await?;
-                let background_music = audio.load_sound("background_song.mp3").await?;
-                audio.play_looping_sound(&background_music)?;
-
-                let boy = RedHatBoy::new(
-                    rhb_sheet,
-                    engine::load_image("rhb.png").await?,
-                    audio,
-                    sound,
-                );
-
-                let background_width = background.width() as i16;
-                let starting_obstacles =
-                    stone_and_platform(stone.clone(), obstacle_sheet.clone(), 0);
-                let timeline = rightmost(&starting_obstacles);
-
-                let machine = WalkTheDogStateMachine::new(Walk {
-                    boy,
-                    backgrounds: [
-                        Image::new(background.clone(), Point { x: 0, y: 0 }),
-                        Image::new(
-                            background,
-                            Point {
-                                x: background_width,
-                                y: 0,
-                            },
-                        ),
-                    ],
-                    obstacles: starting_obstacles,
-                    obstacle_sheet,
-                    stone,
-                    timeline,
-                });
-
+                let machine = WalkTheDogStateMachine::new(Walk::new().await?);
                 Ok(Box::new(WalkTheDog {
                     machine: Some(machine),
                 }))

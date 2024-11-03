@@ -91,3 +91,15 @@ pub(crate) fn platform_and_stone(
         )),
     ]
 }
+
+pub(crate) fn one_stone(stone: HtmlImageElement, offset_x: i16) -> Vec<Box<dyn Obstacle>> {
+    const INITIAL_STONE_OFFSET: i16 = 300;
+
+    vec![Box::new(Barrier::new(Image::new(
+        stone,
+        Point {
+            x: offset_x + INITIAL_STONE_OFFSET,
+            y: STONE_ON_GROUND,
+        },
+    )))]
+}
