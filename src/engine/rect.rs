@@ -46,8 +46,4 @@ impl Rect {
     pub fn set_x(&mut self, x: i16) {
         self.position.x = x;
     }
-
-    pub fn set_y(&mut self, y: i16) {
-        self.position.y = y;
-    }
 }
