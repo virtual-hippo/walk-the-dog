@@ -107,7 +107,10 @@ impl RedHatBoy {
             ),
             &self.destination_box(),
         );
-        renderer.draw_rect(&self.bounding_box());
+
+        if cfg!(debug_assertions) {
+            renderer.draw_rect(&self.bounding_box());
+        }
     }
 
     pub(super) fn knocked_out(&self) -> bool {

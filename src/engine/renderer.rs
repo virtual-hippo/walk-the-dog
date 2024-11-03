@@ -40,11 +40,6 @@ impl Renderer {
         self.context
             .draw_image_with_html_image_element(image, position.x.into(), position.y.into())
             .expect("Drawing is throwing exceptions! Unrecoverable error.");
-        self.draw_rect(&Rect::new(
-            *position,
-            image.width() as i16,
-            image.height() as i16,
-        ));
     }
 
     pub fn draw_rect(&self, bounding_box: &Rect) {

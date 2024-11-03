@@ -21,6 +21,9 @@ impl Obstacle for Barrier {
 
     fn draw(&self, renderer: &crate::engine::Renderer) {
         self.image.draw(renderer);
+        if cfg!(debug_assertions) {
+            renderer.draw_rect(self.image.bounding_box());
+        }
     }
 
     fn move_horizontally(&mut self, x: i16) {
