@@ -7,6 +7,7 @@ use crate::{
 use anyhow::{anyhow, Result};
 use async_trait::async_trait;
 use rand::prelude::*;
+use serde_wasm_bindgen::from_value;
 use std::rc::Rc;
 use web_sys::HtmlImageElement;
 
@@ -94,16 +95,17 @@ impl Game for WalkTheDog {
     async fn initialize(&self) -> Result<Box<dyn Game>> {
         match self.machine {
             None => {
-                let rhb_sheet = browser::fetch_json("rhb.json")
-                    .await?
-                    .into_serde::<Sheet>()?;
+                let rhb_sheet = from_value::<Sheet>(browser::fetch_json("rhb.json").await?)
+                    .map_err(|e| anyhow!("Failed to converting json to Sheet {}:#?", e))?;
+
                 let background = engine::load_image("BG.png").await?;
                 let stone = engine::load_image("Stone.png").await?;
 
                 let tiles = browser::fetch_json("tiles.json").await?;
 
                 let obstacle_sheet = Rc::new(SpriteSheet::new(
-                    tiles.into_serde::<Sheet>()?,
+                    from_value::<Sheet>(tiles)
+                        .map_err(|e| anyhow!("Failed to converting json to Sheet {}:#?", e))?,
                     engine::load_image("tiles.png").await?,
                 ));
 
