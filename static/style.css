@@ -1,3 +1,20 @@
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0;
+    background-color: rgb(248, 254, 255);
+}
+
+#header {    
+    font-family: 'Ken Future';
+    font-size: 64px;
+    height: 70px;
+    width: 600px;
+    margin: 4px;
+    text-align: center;
+}
+
 #ui {
     position: absolute;
 }
@@ -13,7 +30,7 @@ button {
     border: none;
     width: 82px;
     height: 33px;
-    transform: scale(1.8) translate(150px, 100px);
+    transform: scale(1.8) translate(0px, 100px);
 }
 
 button:hover {
