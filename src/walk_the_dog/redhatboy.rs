@@ -109,6 +109,19 @@ impl RedHatBoy {
         );
         renderer.draw_rect(&self.bounding_box());
     }
+
+    pub(super) fn knocked_out(&self) -> bool {
+        self.state_machine.knocked_out()
+    }
+
+    pub(super) fn reset(boy: Self) -> Self {
+        Self::new(
+            boy.sprite_sheet,
+            boy.image,
+            boy.state_machine.context().audio.clone(),
+            boy.state_machine.context().jump_sound.clone(),
+        )
+    }
 }
 
 #[derive(Clone)]
@@ -181,6 +194,10 @@ impl RedHatBoyStateMachine {
 
     fn update(self) -> Self {
         self.transition(Event::Update)
+    }
+
+    pub(super) fn knocked_out(&self) -> bool {
+        matches!(self, RedHatBoyStateMachine::KnockedOut(_))
     }
 }
 

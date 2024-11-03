@@ -1,12 +1,12 @@
 # You must change these to your own details.
 [package]
-name = "rust-webpack-template"
-description = "Walk the Dog - the game for the Rust Games with Web assembly book"
-version = "0.1.0"
 authors = ["virtual-hippo"]
 categories = ["wasm"]
-readme = "README.md"
+description = "Walk the Dog - the game for the Rust Games with Web assembly book"
 edition = "2021"
+name = "rust-webpack-template"
+readme = "README.md"
+version = "0.1.0"
 
 [lib]
 crate-type = ["cdylib"]
@@ -23,25 +23,38 @@ lto = true
 [dependencies]
 # The `wasm-bindgen` crate provides the bare minimum functionality needed
 # to interact with JavaScript.
-wasm-bindgen = {versioin = "0.2.78", features = ["serde-serialize"]}
-console_error_panic_hook = "0.1.7"
-rand = "0.8.4"
-futures = "0.3.18"
-wasm-bindgen-futures = "0.4.28"
-getrandom = {verson = "0.2.3", features = ["js"]}
-serde = { version = "1.0.210", features = ["derive"] }
 anyhow = "1.0.51"
 async-trait = "0.1.52"
-
+console_error_panic_hook = "0.1.7"
+futures = "0.3.18"
+getrandom = {verson = "0.2.3", features = ["js"]}
+rand = "0.8.4"
+serde = {version = "1.0.210", features = ["derive"]}
+wasm-bindgen = {versioin = "0.2.78", features = ["serde-serialize"]}
+wasm-bindgen-futures = "0.4.28"
+js-sys = "0.3.55"
 
 # The `web-sys` crate allows you to interact with the various browser APIs,
 # like the DOM.
 [dependencies.web-sys]
+features = [
+  "console",
+  "AudioContext",
+  "AudioBuffer",
+  "AudioBufferSourceNode",
+  "AudioDestinationNode",
+  "CanvasRenderingContext2d",
+  "Document",
+  "Element",
+  "HtmlCanvasElement",
+  "HtmlImageElement",
+  "KeyboardEvent",
+  "Performance",
+  "Response", 
+  "Window",
+]
 version = "0.3.55"
-features = ["console", "CanvasRenderingContext2d","Document", "Element", "HtmlCanvasElement", "HtmlImageElement", "KeyboardEvent", "Performance", "Response", "Window"]
-
 
 # These crates are used for running unit tests.
 [dev-dependencies]
 wasm-bindgen-test = "0.3.28"
-js-sys = "0.3.55"

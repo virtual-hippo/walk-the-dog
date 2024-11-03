@@ -9,7 +9,8 @@ use wasm_bindgen::{
 };
 use wasm_bindgen_futures::JsFuture;
 use web_sys::{
-    CanvasRenderingContext2d, Document, Element, HtmlCanvasElement, HtmlImageElement, Window,
+    CanvasRenderingContext2d, Document, Element, HtmlCanvasElement, HtmlElement, HtmlImageElement,
+    Window,
 };
 
 macro_rules! log {
@@ -140,6 +141,11 @@ pub fn hide_ui() -> Result<()> {
         ui.remove_child(&child)
             .map(|_| ())
             .map_err(|e| anyhow!("Failed to remove child {:#?}", e))
+            .and_then(|_| {
+                canvas()?
+                    .focus()
+                    .map_err(|e| anyhow!("Could not set focus to canvas! {:#?}", e))
+            })
     } else {
         Ok(())
     }
@@ -150,4 +156,17 @@ fn find_ui() -> Result<Element> {
         doc.get_element_by_id("ui")
             .ok_or_else(|| anyhow!("UI element not found"))
     })
+}
+
+pub fn find_html_element_by_id(id: &str) -> Result<HtmlElement> {
+    document()
+        .and_then(|doc| {
+            doc.get_element_by_id(id)
+                .ok_or_else(|| anyhow!("Element with id {} not found", id))
+        })
+        .and_then(|element| {
+            element
+                .dyn_into::<HtmlElement>()
+                .map_err(|e| anyhow!("Could not cast into HtmlElement {:#?}", e))
+        })
 }
