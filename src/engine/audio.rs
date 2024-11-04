@@ -33,6 +33,6 @@ impl Audio {
 }
 
 #[derive(Clone)]
-pub(crate) struct Sound {
-    buffer: AudioBuffer,
+pub struct Sound {
+    pub buffer: AudioBuffer,
 }

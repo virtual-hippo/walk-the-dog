@@ -5,8 +5,8 @@ use futures::channel::mpsc::UnboundedReceiver;
 const TIMELINE_MINIMUM: i16 = 1000;
 
 pub(super) struct WalkTheDogState<S> {
-    _state: S,
-    walk: Walk,
+    pub(super) _state: S,
+    pub(super) walk: Walk,
 }
 
 impl<S> WalkTheDogState<S> {
@@ -119,7 +119,7 @@ pub(super) enum WalkingEndState {
 }
 
 pub(super) struct GameOver {
-    new_game_event: UnboundedReceiver<()>,
+    pub(super) new_game_event: UnboundedReceiver<()>,
 }
 
 impl GameOver {
@@ -137,7 +137,7 @@ impl WalkTheDogState<GameOver> {
         }
     }
 
-    fn new_game(self) -> WalkTheDogState<Ready> {
+    pub(super) fn new_game(self) -> WalkTheDogState<Ready> {
         let _ = browser::hide_ui();
         WalkTheDogState {
             _state: Ready,
