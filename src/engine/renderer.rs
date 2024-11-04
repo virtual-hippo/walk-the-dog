@@ -1,3 +1,4 @@
+use anyhow::{anyhow, Result};
 use web_sys::{CanvasRenderingContext2d, HtmlImageElement};
 
 use super::{Point, Rect};
@@ -44,13 +45,19 @@ impl Renderer {
 
     pub fn draw_rect(&self, bounding_box: &Rect) {
         self.context.set_stroke_style_str("FF0000");
-        self.context.begin_path();
         self.context.rect(
             bounding_box.x().into(),
             bounding_box.y().into(),
             bounding_box.width.into(),
             bounding_box.height.into(),
         );
-        self.context.stroke();
+    }
+
+    pub fn draw_text(&self, text: &str, location: &Point) -> Result<()> {
+        self.context.set_font("16pt serif");
+        self.context
+            .fill_text(text, location.x.into(), location.y.into())
+            .map_err(|e| anyhow!("Error filling text {:#?}", e))?;
+        Ok(())
     }
 }
