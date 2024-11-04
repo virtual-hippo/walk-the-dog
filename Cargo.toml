@@ -42,6 +42,7 @@ features = [
   "console",
   "AudioContext",
   "AudioBuffer",
+  "AudioBufferOptions",
   "AudioBufferSourceNode",
   "AudioDestinationNode",
   "CanvasRenderingContext2d",

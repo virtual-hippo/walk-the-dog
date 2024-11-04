@@ -19,6 +19,12 @@ macro_rules! log {
     };
 }
 
+macro_rules! error {
+    ($($t:tt)*) => {
+        web_sys::console::error_1(&format!( $( $t )* ).into());
+    };
+}
+
 pub fn window() -> Result<Window> {
     web_sys::window().ok_or_else(|| anyhow!("Not Window Found"))
 }
@@ -99,8 +105,8 @@ pub fn new_image() -> Result<HtmlImageElement> {
     HtmlImageElement::new().map_err(|err| anyhow!("Could not create HtmlImageElement: {:#?}", err))
 }
 
-pub type LoopClosure = Closure<dyn FnMut(f64) -> ()>;
-pub fn create_raf_closure(f: impl FnMut(f64) -> () + 'static) -> LoopClosure {
+pub type LoopClosure = Closure<dyn FnMut(f64)>;
+pub fn create_raf_closure(f: impl FnMut(f64) + 'static) -> LoopClosure {
     closure_wrap(Box::new(f))
 }
 

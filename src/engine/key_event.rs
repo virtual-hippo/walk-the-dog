@@ -40,15 +40,21 @@ pub(super) fn prepare_input() -> Result<mpsc::UnboundedReceiver<KeyPress>> {
     let keyup_sender = Rc::clone(&keydown_sender);
 
     let onkeydown = browser::closure_wrap(Box::new(move |keycode: web_sys::KeyboardEvent| {
-        let _ = keydown_sender
+        if let Err(err) = keydown_sender
             .borrow_mut()
-            .start_send(KeyPress::KeyDown(keycode));
+            .start_send(KeyPress::KeyDown(keycode))
+        {
+            error!("Could not send keyDown message {:#?}", err);
+        }
     }) as Box<dyn FnMut(web_sys::KeyboardEvent)>);
 
     let onkeyup = browser::closure_wrap(Box::new(move |keycode: web_sys::KeyboardEvent| {
-        let _ = keyup_sender
+        if let Err(err) = keyup_sender
             .borrow_mut()
-            .start_send(KeyPress::KeyUp(keycode));
+            .start_send(KeyPress::KeyUp(keycode))
+        {
+            error!("Could not send keyUp message {:#?}", err);
+        }
     }) as Box<dyn FnMut(web_sys::KeyboardEvent)>);
 
     browser::window()?.set_onkeydown(Some(onkeydown.as_ref().unchecked_ref()));

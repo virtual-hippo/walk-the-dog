@@ -168,7 +168,7 @@ impl Game for WalkTheDog {
     }
 
     fn draw(&mut self, renderer: &Renderer) {
-        renderer.clear(&&Rect::new_from_x_y(0, 0, 600, HEIGHT));
+        renderer.clear(&Rect::new_from_x_y(0, 0, 600, HEIGHT));
 
         if let Some(machine) = &self.machine {
             machine.draw(renderer);
@@ -176,7 +176,7 @@ impl Game for WalkTheDog {
     }
 }
 
-fn rightmost(obstacle_list: &Vec<Box<dyn Obstacle>>) -> i16 {
+fn rightmost(obstacle_list: &[Box<dyn Obstacle>]) -> i16 {
     obstacle_list
         .iter()
         .map(|obstacle| obstacle.right())

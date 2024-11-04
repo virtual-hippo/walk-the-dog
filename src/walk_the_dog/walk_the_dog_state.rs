@@ -101,7 +101,7 @@ impl WalkTheDogState<Walking> {
     fn end_game(self) -> WalkTheDogState<GameOver> {
         let receiver = browser::draw_ui("<button id='new_game'>New Game</button>")
             .and_then(|_| browser::find_html_element_by_id("new_game"))
-            .map(|elem| engine::add_click_handler(elem))
+            .map(engine::add_click_handler)
             .unwrap();
 
         WalkTheDogState {
@@ -138,7 +138,10 @@ impl WalkTheDogState<GameOver> {
     }
 
     pub(super) fn new_game(self) -> WalkTheDogState<Ready> {
-        let _ = browser::hide_ui();
+        if let Err(err) = browser::hide_ui() {
+            error!("Error hiding the browser {:#?}", err);
+        }
+
         WalkTheDogState {
             _state: Ready,
             walk: Walk::reset(self.walk),

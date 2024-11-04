@@ -38,7 +38,7 @@ impl GameLoop {
 
             game_loop.last_frame = perf;
             game.draw(&renderer);
-            let _ = browser::request_animation_frame(f.borrow().as_ref().unwrap());
+            browser::request_animation_frame(f.borrow().as_ref().unwrap()).unwrap();
         }));
 
         browser::request_animation_frame(

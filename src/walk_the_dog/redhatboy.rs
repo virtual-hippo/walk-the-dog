@@ -97,7 +97,7 @@ impl RedHatBoy {
     pub(super) fn draw(&self, renderer: &Renderer) {
         let sprite = self.current_sprite().expect("Cell not found");
 
-        let _ = renderer.draw_image(
+        renderer.draw_image(
             &self.image,
             &Rect::new_from_x_y(
                 sprite.frame.x,

@@ -21,7 +21,7 @@ impl Platform {
     ) -> Self {
         let sprites = sprite_names
             .iter()
-            .filter_map(|sprite_name| sheet.cell(&sprite_name).cloned())
+            .filter_map(|sprite_name| sheet.cell(sprite_name).cloned())
             .collect();
 
         let bounding_boxes = bounding_boxes
