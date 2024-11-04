@@ -1,8 +1,5 @@
-use super::game::Walk;
-use crate::{
-    browser,
-    engine::{self, KeyState, Renderer},
-};
+use super::{browser, game::Walk};
+use crate::engine::{self, KeyState, Renderer};
 use futures::channel::mpsc::UnboundedReceiver;
 
 const TIMELINE_MINIMUM: i16 = 1000;

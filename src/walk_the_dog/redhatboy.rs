@@ -1,5 +1,5 @@
+use super::*;
 use crate::engine::{Audio, Cell, Rect, Renderer, Sheet, Sound};
-use crate::walk_the_dog::*;
 
 use web_sys::HtmlImageElement;
 

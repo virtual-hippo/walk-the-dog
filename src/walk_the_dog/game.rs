@@ -1,8 +1,7 @@
+use super::{browser, *};
 use crate::{
-    browser,
     engine::{self, Audio, Game, Image, KeyState, Point, Rect, Renderer, Sheet, SpriteSheet},
     segment::*,
-    walk_the_dog::*,
 };
 use anyhow::{anyhow, Result};
 use async_trait::async_trait;
